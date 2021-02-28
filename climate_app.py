@@ -15,6 +15,7 @@ Base = automap_base()
 Base.prepare(engine, reflect=True)
 
 # Save reference to the table
+Measurement = Base.classes.measurement
 
 app = Flask(__name__)
 @app.route("/")
@@ -26,9 +27,29 @@ def Home():
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>")
 
+@app.route("/api/v1.0/precipitation")
+def precipitation():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
 
+    """Return a list of all passenger names"""
+    # Query most recent 12 months precipitation data
+    prcp_data=session.query(Measurement.date, Measurement.prcp).filter(Measurement.date>='2016-08-23').all()
+
+    session.close()
+    
+    prcp_json = []
+    for date, prcp in prcp_data:
+       prcp_dict = {}
+       prcp_dict["date"] = date
+       prcp_dict["prcp"] = prcp
+       prcp_json.append(prcp_dict)
+
+    # Convert list of tuples into normal list
+
+    return jsonify(prcp_json)
 if __name__ == "__main__":
     app.run(debug=True)
 
 
-    Base.classes.keys()
+    # Base.classes.keys()
