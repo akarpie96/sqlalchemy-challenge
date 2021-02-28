@@ -16,7 +16,7 @@ Base.prepare(engine, reflect=True)
 
 # Save reference to the table
 Measurement = Base.classes.measurement
-
+Station=Base.classes.station
 app = Flask(__name__)
 @app.route("/")
 def Home():
@@ -48,6 +48,28 @@ def precipitation():
     # Convert list of tuples into normal list
 
     return jsonify(prcp_json)
+
+@app.route("/api/v1.0/stations")
+def stations():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of all passenger names"""
+    # Query most recent 12 months precipitation data
+    station_data=session.query(Station.station, Station.name).all()
+
+    session.close()
+    
+    station_json = []
+    for station, name in station_data:
+       station_dict = {}
+       station_dict["station"] = station
+       station_dict["name"] = name
+       station_json.append(station_dict)
+
+    # Convert list of tuples into normal list
+
+    return jsonify(station_json)
 if __name__ == "__main__":
     app.run(debug=True)
 
