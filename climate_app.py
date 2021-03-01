@@ -70,6 +70,26 @@ def stations():
     # Convert list of tuples into normal list
 
     return jsonify(station_json)
+
+@app.route("/api/v1.0/tobs")
+def tobs():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    # Query most recent 12 months precipitation data
+    temp_data_active=session.query(Measurement.date, Measurement.tobs).filter(Measurement.date>='2016-08-18').filter(Measurement.station=='USC00519281').all()
+    session.close()
+    
+    temp_json = []
+    for date, tobs in temp_data_active:
+       temp_dict = {}
+       temp_dict["date"] = date
+       temp_dict["tobs"] = tobs
+       temp_json.append(temp_dict)
+
+    # Convert list of tuples into normal list
+
+    return jsonify(temp_json)
 if __name__ == "__main__":
     app.run(debug=True)
 
